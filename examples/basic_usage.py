@@ -1,8 +1,13 @@
+import os
 from excgrouper import ExcGrouper
 
 def main():
-    # Initialize ExcGrouper
-    grouper = ExcGrouper()
+    # Initialize ExcGrouper with config file
+    # Replace with the name of the config file you want to use,
+    # e.g. config_local_fs.yaml, config_local_url.yaml, config.yaml
+    config_name = 'config_local_fs.yaml'
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src', 'excgrouper', 'configs', config_name)
+    grouper = ExcGrouper(config_path=config_path)
 
     # Group some exceptions
     exceptions = [

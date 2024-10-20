@@ -1,11 +1,6 @@
-# (Recommended) Container configuration example
-# storage:
-#   url: http://localhost:8000
-#   api_key: null
-
-# Local file system storage configuration example
+# Local vector database storage configuration example
 storage:
-  local_path: ~/.excgrouper
+  local_url: http://qdrant:6333
 
 # (Recommended) config using OpenAI embeddings
 # embedding:

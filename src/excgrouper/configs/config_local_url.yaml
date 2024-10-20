@@ -1,0 +1,19 @@
+# Local vector database storage configuration example
+# Pre-requisite: Qdrant server running on localhost:6333, 
+# command: docker run -p 6333:6333 -v $(pwd)/qdrant_data:/qdrant/storage qdrant/qdrant
+
+storage:
+  local_url: localhost:6333
+
+# (Recommended) config using OpenAI embeddings
+# embedding:
+#   class: OpenAIEmbedding
+#   # kwargs:
+#   #   api_key: your_openai_api_key_here or configure the OPENAI_API_KEY environment variable
+#   similarity_threshold: 0.9
+
+embedding:
+  class: SentenceTransformerEmbedding
+  kwargs:
+    model_name: all-mpnet-base-v2
+  similarity_threshold: 0.8

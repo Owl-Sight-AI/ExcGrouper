@@ -6,11 +6,13 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      - ./:/app
     environment:
-      - QDRANT_URL=http://qdrant:6333
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
     depends_on:
       - qdrant
+    command: ["uvicorn", "src.server.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--reload"]
 
   qdrant:
     image: qdrant/qdrant

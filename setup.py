@@ -14,7 +14,7 @@ setup(
     url="https://github.com/Owl-Sight-AI/ExcGrouper",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    classifiers=[git init
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
@@ -29,13 +29,13 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        "docker-compose",
-        "fastapi",
-        "openai",
-        "qdrant-client",
-        "requests",
-        "sentence-transformers",
-        "uvicorn",
+        "fastapi==0.95.1",
+        "openai==1.51.2",
+        "qdrant-client==1.12.0",
+        "requests==2.30.0",
+        "sentence-transformers==3.2.0",
+        "huggingface_hub>=0.20.0",
+        "uvicorn==0.22.0",
     ],
     extras_require={
         "dev": ["pytest", "black", "isort"],

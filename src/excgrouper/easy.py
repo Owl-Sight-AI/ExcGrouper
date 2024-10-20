@@ -5,6 +5,7 @@ from typing import List, Dict, Optional
 from datetime import datetime
 from .core import ExceptionGrouper, ExceptionEvent
 from .storage.qdrant import QdrantVectorStorage
+# Do not remove these imports as they are used by the embedding classes
 from .embeddings.sentence_transformers import SentenceTransformerEmbedding
 from .embeddings.openai_embedding import OpenAIEmbedding
 import requests
@@ -13,14 +14,14 @@ class ExcGrouper:
     def __init__(self, config_path: str = None):
         self.config = self._load_config(config_path)
         
-        if 'local_path' in self.config['storage']:
+        if 'local_path' in self.config['storage'] or 'local_url' in self.config['storage']:
             self._setup_local()
         else:
             self._setup_cloud()
     
     def _load_config(self, config_path: str = None):
         if not config_path:
-            config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+            config_path = os.path.join(os.path.dirname(__file__), 'configs', 'config.yaml')
         
         with open(config_path, 'r') as f:
             return yaml.safe_load(f)
@@ -28,13 +29,10 @@ class ExcGrouper:
     def _setup_cloud(self):
         self.url = self.config['storage']['url']
         self.headers = {"Content-Type": "application/json"}
-        if self.config['storage']['api_key']:
+        if 'api_key' in self.config['storage']:
             self.headers["Authorization"] = f"Bearer {self.config['storage']['api_key']}"
 
     def _setup_local(self):
-        storage_path = os.path.expanduser(self.config['storage']['local_path'])
-        Path(storage_path).mkdir(parents=True, exist_ok=True)
-        
         embedding_config = self.config['embedding']
         embedding_class = globals()[embedding_config['class']]
         embedding = embedding_class(**embedding_config.get('kwargs', {}))
@@ -42,10 +40,19 @@ class ExcGrouper:
         # Determine the embedding vector size automatically
         embedding_vector_size = embedding.get_vector_size()
         
-        storage = QdrantVectorStorage(
-            path=storage_path,
-            size=embedding_vector_size
-        )
+        storage_config = self.config['storage']
+        if 'local_url' in storage_config:
+            storage = QdrantVectorStorage(
+                url=storage_config['local_url'],
+                size=embedding_vector_size
+            )
+        else:
+            storage_path = os.path.expanduser(storage_config['local_path'])
+            Path(storage_path).mkdir(parents=True, exist_ok=True)
+            storage = QdrantVectorStorage(
+                path=storage_path,
+                size=embedding_vector_size
+            )
         
         self.grouper = ExceptionGrouper(
             storage=storage,
@@ -83,8 +90,7 @@ class ExcGrouper:
         if hasattr(self, 'grouper'):
             return self.grouper.get_top_exceptions(limit, days)
         else:
-            params = {"limit": limit, "days": days}
-            return self._make_request("top_exceptions", params=params)
+            return self._make_request("top_exceptions", data={"limit": limit, "days": days})
 
     @classmethod
     def setup_exception_hook(cls, **kwargs):
